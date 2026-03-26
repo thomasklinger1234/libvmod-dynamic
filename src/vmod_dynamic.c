@@ -443,7 +443,9 @@ dom_list(VRT_CTX, VCL_BACKEND dir, struct vsb *vsb, int pflag, int jflag)
 			VSB_indent(vsb, 2);
 			VSB_printf(vsb, "\"health\": \"%s\"\n",
 			    h ? "healthy" : "sick");
-			VSB_indent(vsb, -2);
+            VSB_printf(vsb, "\"preferred\": %d\n",
+                r->preferred);
+            VSB_indent(vsb, -2);
 			VSB_cat(vsb, "}");
 		}
 		else if (pflag) {
