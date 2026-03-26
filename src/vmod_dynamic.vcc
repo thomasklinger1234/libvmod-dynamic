@@ -237,6 +237,7 @@ $Object director(
 	ENUM { DEFAULT, DIRECTOR, HOST } share	= "DEFAULT",
 	PROBE probe				= 0,
 	ACL whitelist				= 0,
+	ACL prefer                  = 0,
 	DURATION ttl				= 3600,
 	DURATION connect_timeout		= -1,
 	DURATION first_byte_timeout		= -1,
@@ -281,6 +282,10 @@ Parameters:
 	- *whitelist* - an acl (defaults to none)
 
 	  Only name resolution results matching the acl will be used.
+
+	- *prefer* - an acl (defaults to none)
+
+	  Name resolution results matching the acl will be prefered.
 
 	- *ttl* - interval between lookups (defaults to one hour)
 

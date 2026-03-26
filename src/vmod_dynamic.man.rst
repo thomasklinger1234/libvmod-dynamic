@@ -23,7 +23,7 @@ SYNOPSIS
 
   import dynamic [as name] [from "path"]
   
-  new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
+  new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, ACL prefer, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
   
       BACKEND xdirector.backend(STRING host, STRING port, STRING authority)
    
@@ -260,8 +260,8 @@ logged with the following event::
 
 .. _dynamic.director():
 
-new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, ACL prefer, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ::
 
@@ -271,6 +271,7 @@ new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PR
       ENUM {DEFAULT, DIRECTOR, HOST} share=DEFAULT,
       PROBE probe=0,
       ACL whitelist=0,
+      ACL prefer=0,
       DURATION ttl=3600,
       DURATION connect_timeout=-1,
       DURATION first_byte_timeout=-1,
@@ -316,6 +317,10 @@ Parameters:
 	- *whitelist* - an acl (defaults to none)
 
 	  Only name resolution results matching the acl will be used.
+
+	- *prefer* - an acl (defaults to none)
+
+	  Name resolution results matching the acl will be prefered.
 
 	- *ttl* - interval between lookups (defaults to one hour)
 

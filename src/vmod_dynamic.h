@@ -47,6 +47,7 @@ struct dynamic_ref {
 	unsigned			magic;
 #define DYNAMIC_REF_MAGIC		0x79a19d81
 	unsigned			keep;
+	unsigned preferred;
 	VTAILQ_ENTRY(dynamic_ref)	list;
 	struct dynamic_domain		*dom;
 	VCL_BACKEND			dir;
@@ -174,6 +175,7 @@ struct vmod_dynamic_director {
 	enum dynamic_share_e			share;
 	VCL_PROBE				probe;
 	VCL_ACL					whitelist;
+	VCL_ACL                 prefer;
 	VCL_DURATION				ttl;
 	VCL_DURATION				retry_after;
 	VCL_DURATION				connect_tmo;

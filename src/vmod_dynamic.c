@@ -775,6 +775,9 @@ dom_update(struct dynamic_domain *dom, const struct res_cb *res,
 		r->sa = VSA_Clone(info->sa);
 		AZ(r->dir);
 		r->dir = creating;
+        if (r->dom->obj->prefer != NULL) {
+            r->preferred = VRT_acl_match(ctx, r->dom->obj->prefer, info->sa);
+        }
 		VTAILQ_INSERT_TAIL(&dom->refs, r, list);
 	}
 
@@ -1318,6 +1321,7 @@ vmod_director__init(VRT_CTX,
     VCL_ENUM share_arg,
     VCL_PROBE probe,
     VCL_ACL whitelist,
+    VCL_ACL prefer,
     VCL_DURATION ttl,
     VCL_DURATION connect_timeout,
     VCL_DURATION first_byte_timeout,
@@ -1396,6 +1400,7 @@ vmod_director__init(VRT_CTX,
 	obj->share = dynamic_share_parse(share_arg);
 	obj->probe = probe;
 	obj->whitelist = whitelist;
+	obj->prefer = prefer;
 	obj->ttl = ttl;
 	obj->retry_after = retry_after;
 	obj->connect_tmo = connect_timeout;
