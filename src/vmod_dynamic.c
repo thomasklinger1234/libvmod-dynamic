@@ -252,68 +252,70 @@ dom_wait_active(struct dynamic_domain *dom)
 }
 
 /* find a healthy dynamic_ref */
+
 static struct dynamic_ref *
-dom_find(VRT_CTX, struct dynamic_domain *dom, struct dynamic_ref *start,
-    VCL_BOOL *healthy, VCL_TIME *changed, unsigned wait)
-{
-	struct dynamic_ref *next, *alt;
+dom_find_v2(VRT_CTX, struct dynamic_domain *dom, VCL_BOOL *healthy, VCL_TIME *changed, unsigned wait) {
+    struct dynamic_ref *r, *r_alt;
 	VCL_TIME c, cc;
 	VCL_BOOL h;
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
 	CHECK_OBJ_NOTNULL(dom, DYNAMIC_DOMAIN_MAGIC);
-	CHECK_OBJ_ORNULL(start, DYNAMIC_REF_MAGIC);
 
 	dom_wait_active(dom);
 
 	if (dom->status > DYNAMIC_ST_ACTIVE)
 		return (NULL);
 
-	if (start == NULL)
-		start = VTAILQ_FIRST(&dom->refs);
+    if (VTAILQ_EMPTY(&dom->refs))
+        return (NULL);
 
-	h = 0;
-	cc = dom->changed_cached;
-	next = start;
-	alt = NULL;
+    r = dom->current == NULL ? VTAILQ_FIRST(&dom->refs) : VTAILQ_NEXT(dom->current, list);
+    r_alt = NULL;
 
-	//lint -e{506} Constant value boolean
-	do {
-		CHECK_OBJ_ORNULL(next, DYNAMIC_REF_MAGIC);
-		if (next != NULL)
-			next = VTAILQ_NEXT(next, list);
-		if (next == NULL)
-			next = VTAILQ_FIRST(&dom->refs);
-		if (next == NULL)
-			break;
-		if (next->dir != creating && next->dir != NULL) {
-			h = VRT_Healthy(ctx, next->dir, &c);
-			if (c > cc)
-				cc = c;
-			if (h)
-				break;
-		}
-		/* if we do not find a healthy backend, use one with a director
-		 * or, alternatively, whatever we can get
-		 */
-		if (alt == NULL ||
-		    (alt->dir == creating && next->dir != creating))
-			alt = next;
-		if (next != start)
-			continue;
+    cc = dom->changed_cached;
+    h = 0;
 
-		// we have iterated the list once
+    // 1st pass: find a healthy backend
+    VTAILQ_FOREACH_FROM(r, &dom->refs, list) {
+        if (r->dir != NULL && r->dir != creating) {
+            h = VRT_Healthy(ctx, r->dir, &c);
+            if(h) {
+                dom->current = r;
 
-		if (alt->dir != creating) {
-			next = alt;
-			break;
-		}
-		if (wait == 0)
-			break;
+                if (c > cc)
+                    cc = c;
 
-		assert(alt->dir == creating);
+                LOG(ctx, SLT_Error, dom, "Selecting healthy backend %s", dom->current->dir->vcl_name);
+                break;
+            }
+        }
+    }
+
+    // 2nd pass: find a healthy backend AND a preferred one
+    if (r == NULL) {
+        goto done;
+    }
+
+    VTAILQ_FOREACH_FROM(r_alt, &dom->refs, list) {
+        if (r_alt == r) {
+            continue;
+        }
+
+        if (r_alt->dir != NULL && r_alt->dir != creating) {
+            h = VRT_Healthy(ctx, r_alt->dir, NULL);
+            if(h && r_alt->preferred > r->preferred) {
+                dom->current = r_alt;
+                LOG(ctx, SLT_Error, dom, "Selecting preferred backend %s", dom->current->dir->vcl_name);
+                break;
+            }
+        }
+    }
+
+done:
+    if (wait && dom->current->dir == creating) {
 		AZ(Lck_CondWait(&dom->resolve, &dom->mtx));
-	} while (1);
+    }
 
 	dom->healthy_cached = h;
 	dom->changed_cached = cc;
@@ -323,14 +325,14 @@ dom_find(VRT_CTX, struct dynamic_domain *dom, struct dynamic_ref *start,
 	if (changed)
 		*changed = cc;
 
-	return (next);
+    return dom->current;
 }
 
 static VCL_BACKEND v_matchproto_(vdi_resolve_f)
 dom_resolve(VRT_CTX, VCL_BACKEND d)
 {
 	struct dynamic_domain *dom;
-	struct dynamic_ref *r;
+	struct dynamic_ref *r = NULL;
 	VCL_BACKEND n = NULL;
 
 	CHECK_OBJ_NOTNULL(ctx, VRT_CTX_MAGIC);
@@ -348,8 +350,7 @@ dom_resolve(VRT_CTX, VCL_BACKEND d)
 		dynamic_gc_expired(dom->obj);
 
 	Lck_Lock(&dom->mtx);
-	r = dom_find(ctx, dom, dom->current, NULL, NULL, 1);
-	dom->current = r;
+    r = dom_find_v2(ctx, dom, NULL, NULL, 1);
 	if (r != NULL)
 		VRT_Assign_Backend(&n, r->dir);
 	Lck_Unlock(&dom->mtx);
@@ -388,7 +389,7 @@ dom_healthy(VRT_CTX, VCL_BACKEND d, VCL_TIME *changed)
 		return (dom->healthy_cached);
 	}
 
-	(void) dom_find(ctx, dom, NULL, &retval, changed, IS_CLI() ? 0 : 1);
+	(void) dom_find_v2(ctx, dom, &retval, changed, IS_CLI() ? 0 : 1);
 	Lck_Unlock(&dom->mtx);
 
 	return (retval);
