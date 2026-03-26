@@ -7,6 +7,10 @@ version 2.8.0.
 NEXT (no release branch)
 ------------------------
 
+* Added the new ``prefer`` parameter to prioritize backends during selection based on an ACL (`132`_)
+
+.. _132: https://github.com/nigoroll/libvmod-dynamic/issues/132
+
 7.7 branch
 ----------
 
