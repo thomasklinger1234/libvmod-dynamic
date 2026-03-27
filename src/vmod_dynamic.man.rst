@@ -23,7 +23,7 @@ SYNOPSIS
 
   import dynamic [as name] [from "path"]
   
-  new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
+  new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT ssl, INT ssl_noverify, INT ssl_nosni, INT ssl_sni, INT ssl_verify_peer, INT ssl_verify_host, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
   
       BACKEND xdirector.backend(STRING host, STRING port, STRING authority)
    
@@ -260,8 +260,8 @@ logged with the following event::
 
 .. _dynamic.director():
 
-new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT ssl, INT ssl_noverify, INT ssl_nosni, INT ssl_sni, INT ssl_verify_peer, INT ssl_verify_host, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ::
 
@@ -277,6 +277,12 @@ new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PR
       DURATION between_bytes_timeout=-1,
       DURATION domain_usage_timeout=7200,
       DURATION first_lookup_timeout=10,
+      INT ssl=0,
+      INT ssl_noverify=0,
+      INT ssl_nosni=1,
+      INT ssl_sni=0,
+      INT ssl_verify_peer=1,
+      INT ssl_verify_host=1,
       INT max_connections=0,
       INT proxy_header=0,
       BLOB resolver=NULL,
@@ -334,6 +340,30 @@ Parameters:
 	  Delay until the director fails lookup when a domain is
 	  requested for the first time and there is no response from
 	  the name service (defaults to ten seconds)
+
+    - *ssl*
+
+      Enable SSL transport on this backend , see also `ssl`_.
+
+    - *ssl_noverify*
+
+      Skip SSL verification.
+
+    - *ssl_nosni*
+
+      Suspend Server Name Indication (SNI). This is mutually exclusive with `ssl_sni`.
+
+    - *ssl_sni*
+
+      Enable Server Name Indication (SNI).
+
+    - *ssl_verify_peer*
+
+      Enable SSL peer validation.
+
+    - *ssl_verify_host*
+
+      Enable SSL host validation.
 
 	- *resolver*
 
@@ -400,6 +430,13 @@ Parameters:
 	  The ``keep`` value must not be negative and it is capped to
 	  a high positive value (``UINT_MAX``, usually 4 294 967 295,
 	  see :ref:`limits.h(7POSIX)`).
+
+.. _ssl:
+
+	- *ssl* (default: 0)
+
+	  Enable SSL transport on this director. All `ssl_` parameters map to `backend` SSL attributes and require Varnish 9.x with TLS support.
+	  On Vinyl Cache or unsupported builds, setting `ssl=1` will result in a runtime error.
 
 Parameters to set attributes of backends
 
