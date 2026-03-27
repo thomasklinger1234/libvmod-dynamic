@@ -47,6 +47,13 @@ AC_CHECK_HEADERS([cache/cache.h], [],
     [AC_MSG_ERROR([Missing \$VARNISHSRC development files.])],
        [[#include <cache/cache.h>]])
 
+save_CFLAGS="$CFLAGS"
+CFLAGS="$VARNISHAPI_CFLAGS $CFLAGS"
+AC_CHECK_MEMBER([struct vrt_endpoint.sslflags],
+	[AC_DEFINE([HAVE_STRUCT_VRT_ENDPOINT_SSLFLAGS], [1], [Check for TLS support: sslflags is present in struct vrt_endpoint (Varnish 9.x and higher)])],
+	[], [[#include <cache/cache.h>]])
+CFLAGS="$save_CFLAGS"
+
 AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
