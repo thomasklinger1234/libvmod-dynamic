@@ -1415,6 +1415,42 @@ vmod_director__init(VRT_CTX,
 	obj->keep = (unsigned)keep;
 	obj->wait_timeout = wait_timeout;
 	obj->wait_limit = wait_limit;
+#ifdef HAVE_STRUCT_VRT_ENDPOINT_SSLFLAGS
+    #define SSL_FLAG_IS_BOOL(x) x == 0 || x == 1
+    assert(SSL_FLAG_IS_BOOL(ssl));
+    assert(SSL_FLAG_IS_BOOL(ssl_nosni));
+    assert(SSL_FLAG_IS_BOOL(ssl_sni));
+    assert(SSL_FLAG_IS_BOOL(ssl_verify_peer));
+    assert(SSL_FLAG_IS_BOOL(ssl_verify_host));
+    ##undef SSL_FLAG_IS_BOOL
+
+	if (ssl_sni == ssl_nosni) {
+		VRT_fail(ctx, "dynamic.director(): ssl_sni(%lld) and ssl_nosni(%lld) are mutually exclusive", ssl_sni, ssl_nosni);
+		return;
+	}
+
+	if (ssl_noverify == ssl_verify_peer) {
+		VRT_fail(ctx, "dynamic.director(): ssl_noverify(%lld) and ssl_verify_peer(%lld) are mutually exclusive", ssl_noverify, ssl_verify_peer);
+		return;
+	}
+
+	if (ssl_noverify == ssl_verify_host) {
+		VRT_fail(ctx, "dynamic.director(): ssl_noverify(%lld) and ssl_verify_host(%lld) are mutually exclusive", ssl_noverify, ssl_verify_host);
+		return;
+	}
+
+	obj->ssl = ssl;
+	obj->ssl_noverify = ssl_noverify;
+	obj->ssl_nosni = ssl_nosni;
+	obj->ssl_sni = ssl_sni,
+	obj->ssl_verify_peer = ssl_verify_peer;
+	obj->ssl_verify_host = ssl_verify_host;
+#else
+    if (ssl) {
+		VRT_fail(ctx, "dynamic.director(): ssl(%lld) is enabled but not supported on this instance", ssl);
+		return;
+    }
+#endif
 
 	if (resolver != NULL) {
 		obj->resolver = &res_getdns;
