@@ -7,6 +7,9 @@ version 2.8.0.
 NEXT (no release branch)
 ------------------------
 
+* Added the ``ssl_*`` directory parameters to enable native SSL/TLS transport on backends, if supported by the
+  Cache installation (Varnish 9.x and higher).
+
 7.7 branch
 ----------
 
