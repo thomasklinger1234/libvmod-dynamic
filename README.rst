@@ -78,7 +78,8 @@ Now https connections to backends can be initiated like this, for example::
         set bereq.backend = https.backend();
     }
 
-If the distribution supports native TLS for backends, TLS onloading can be replaced with a director::
+If the distribution supports native TLS for backends, TLS onloading can be replaced with a director, removing
+the need for HAProxy or any other external software::
 
     sub vcl_init {
         new https = dynamic.director(
