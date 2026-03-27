@@ -78,6 +78,14 @@ Now https connections to backends can be initiated like this, for example::
         set bereq.backend = https.backend();
     }
 
+If the distribution supports native TLS for backends, TLS onloading can be replaced with a director::
+
+    sub vcl_init {
+        new https = dynamic.director(
+            ssl = 1,
+        );
+    }
+
 That's it for the basics. Read on for more details and additional topics like
 TTL control, SRV record support, connection sharing options, timeouts, probes
 and more.
