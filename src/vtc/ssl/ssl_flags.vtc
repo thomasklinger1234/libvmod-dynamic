@@ -15,6 +15,9 @@ varnish v1 -vcl {
 		    port = "${s1_port}",
 		    host_header = "www.example.com",
 		    ssl = 1,
+        ssl_sni = 1,
+        ssl_verify_host = 1,
+        ssl_verify_peer = 1,
 		);
 	}
 

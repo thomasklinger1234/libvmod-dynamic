@@ -244,11 +244,9 @@ $Object director(
 	DURATION domain_usage_timeout		= 7200,
 	DURATION first_lookup_timeout		= 10,
 	INT ssl = 0,
-	INT ssl_noverify = 0,
-	INT ssl_nosni = 1,
-	INT ssl_sni = 0,
+	INT ssl_sni = 1,
 	INT ssl_verify_peer = 1,
-	INT ssl_verify_host = 1,
+	INT ssl_verify_host = 0,
 	INT max_connections			= 0,
 	INT proxy_header			= 0,
 	BLOB resolver				= NULL,
@@ -310,14 +308,6 @@ Parameters:
 
     Enable TLS/SSL transport on this backend , see also `ssl`_. Enabling this flag requires `host_header` to be set as well.
     For builds that do not have a SSL enabled Varnish, setting this flag will cause a failure.
-
-  - *ssl_noverify*
-
-    Skip TLS/SSL verification.
-
-  - *ssl_nosni*
-
-    Suspend Server Name Indication (SNI). This is mutually exclusive with `ssl_sni`.
 
   - *ssl_sni*
 

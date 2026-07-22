@@ -15,8 +15,6 @@ DIRPROP("first_lookup_timeout", "%.2f", obj->first_lookup_tmo)
 DIRPROP("max_connections",	"%u",	obj->max_connections)
 #ifdef HAVE_STRUCT_VRT_ENDPOINT_SSLFLAGS
 DIRPROP("ssl",	"%s",	obj->ssl ? "true" : "false")
-DIRPROP("ssl_noverify",	"%s",	obj->ssl_noverify ? "true" : "false")
-DIRPROP("ssl_nosni",	"%s",	obj->ssl_nosni ? "true" : "false")
 DIRPROP("ssl_sni",	"%s",	obj->ssl_sni ? "true" : "false")
 DIRPROP("ssl_verify_peer",	"%s",	obj->ssl_verify_peer ? "true" : "false")
 DIRPROP("ssl_verify_host",	"%s",	obj->ssl_verify_host ? "true" : "false")

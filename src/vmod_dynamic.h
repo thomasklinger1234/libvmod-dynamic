@@ -183,8 +183,6 @@ struct vmod_dynamic_director {
 	VCL_DURATION				first_lookup_tmo;
 	VCL_DURATION				wait_timeout;
 	VCL_INT ssl;
-	VCL_INT ssl_noverify;
-	VCL_INT ssl_nosni;
 	VCL_INT ssl_sni;
 	VCL_INT ssl_verify_peer;
 	VCL_INT ssl_verify_host;

@@ -691,31 +691,19 @@ ref_add(VRT_CTX, struct dynamic_ref *r)
 	}
 
 	if (dom->obj->ssl_sni) {
-        ep.sslflags &= ~BSSL_F_NOSNI;
+      ep.sslflags &= ~BSSL_F_NOSNI;
 	} else {
 	    ep.sslflags |= BSSL_F_NOSNI;
 	}
 
-	if (dom->obj->ssl_nosni) {
-        ep.sslflags |= BSSL_F_NOSNI;
-	} else {
-	    ep.sslflags &= ~BSSL_F_NOSNI;
-	}
-
-	if (dom->obj->ssl_noverify) {
-        ep.sslflags |= BSSL_F_NOVERIFY;
-	} else {
-	    ep.sslflags &= ~BSSL_F_NOVERIFY;
-	}
-
 	if (dom->obj->ssl_verify_peer) {
-        ep.sslflags &= ~BSSL_F_NOVERIFY;
+      ep.sslflags &= ~BSSL_F_NOVERIFY;
 	} else {
 	    ep.sslflags |= BSSL_F_NOVERIFY;
 	}
 
 	if (dom->obj->ssl_verify_host) {
-        ep.sslflags |= BSSL_F_VERIFY_HOST;
+      ep.sslflags |= BSSL_F_VERIFY_HOST;
 	} else {
 	    ep.sslflags &= ~BSSL_F_VERIFY_HOST;
 	}
@@ -1374,8 +1362,6 @@ vmod_director__init(VRT_CTX,
     VCL_DURATION domain_usage_timeout,
     VCL_DURATION first_lookup_timeout,
     VCL_INT ssl,
-    VCL_INT ssl_noverify,
-    VCL_INT ssl_nosni,
     VCL_INT ssl_sni,
     VCL_INT ssl_verify_peer,
     VCL_INT ssl_verify_host,
@@ -1467,30 +1453,12 @@ vmod_director__init(VRT_CTX,
 #ifdef HAVE_STRUCT_VRT_ENDPOINT_SSLFLAGS
     #define SSL_FLAG_IS_BOOL(x) x == 0 || x == 1
     assert(SSL_FLAG_IS_BOOL(ssl));
-    assert(SSL_FLAG_IS_BOOL(ssl_nosni));
     assert(SSL_FLAG_IS_BOOL(ssl_sni));
     assert(SSL_FLAG_IS_BOOL(ssl_verify_peer));
     assert(SSL_FLAG_IS_BOOL(ssl_verify_host));
     #undef SSL_FLAG_IS_BOOL
 
-	if (ssl_sni == ssl_nosni) {
-		VRT_fail(ctx, "dynamic.director(): ssl_sni and ssl_nosni are mutually exclusive");
-		return;
-	}
-
-	if (ssl_noverify == ssl_verify_peer) {
-		VRT_fail(ctx, "dynamic.director(): ssl_noverify and ssl_verify_peer are mutually exclusive");
-		return;
-	}
-
-	if (ssl_noverify == ssl_verify_host) {
-		VRT_fail(ctx, "dynamic.director(): ssl_noverify and ssl_verify_host are mutually exclusive");
-		return;
-	}
-
 	obj->ssl = ssl;
-	obj->ssl_noverify = ssl_noverify;
-	obj->ssl_nosni = ssl_nosni;
 	obj->ssl_sni = ssl_sni,
 	obj->ssl_verify_peer = ssl_verify_peer;
 	obj->ssl_verify_host = ssl_verify_host;

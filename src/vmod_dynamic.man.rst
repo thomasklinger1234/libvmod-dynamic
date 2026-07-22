@@ -23,7 +23,7 @@ SYNOPSIS
 
   import dynamic [as name] [from "path"]
   
-  new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT ssl, INT ssl_noverify, INT ssl_nosni, INT ssl_sni, INT ssl_verify_peer, INT ssl_verify_host, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
+  new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT ssl, INT ssl_sni, INT ssl_verify_peer, INT ssl_verify_host, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
   
       BACKEND xdirector.backend(STRING host, STRING port, STRING authority)
    
@@ -260,8 +260,8 @@ logged with the following event::
 
 .. _dynamic.director():
 
-new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT ssl, INT ssl_noverify, INT ssl_nosni, INT ssl_sni, INT ssl_verify_peer, INT ssl_verify_host, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT ssl, INT ssl_sni, INT ssl_verify_peer, INT ssl_verify_host, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ::
 
@@ -278,11 +278,9 @@ new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PR
       DURATION domain_usage_timeout=7200,
       DURATION first_lookup_timeout=10,
       INT ssl=0,
-      INT ssl_noverify=0,
-      INT ssl_nosni=1,
-      INT ssl_sni=0,
+      INT ssl_sni=1,
       INT ssl_verify_peer=1,
-      INT ssl_verify_host=1,
+      INT ssl_verify_host=0,
       INT max_connections=0,
       INT proxy_header=0,
       BLOB resolver=NULL,
@@ -345,14 +343,6 @@ Parameters:
 
     Enable TLS/SSL transport on this backend , see also `ssl`_. Enabling this flag requires `host_header` to be set as well.
     For builds that do not have a SSL enabled Varnish, setting this flag will cause a failure.
-
-  - *ssl_noverify*
-
-    Skip TLS/SSL verification.
-
-  - *ssl_nosni*
-
-    Suspend Server Name Indication (SNI). This is mutually exclusive with `ssl_sni`.
 
   - *ssl_sni*
 
