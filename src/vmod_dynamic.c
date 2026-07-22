@@ -676,7 +676,7 @@ ref_add(VRT_CTX, struct dynamic_ref *r)
 		WRONG("unexpected family");
 	}
 
-	#ifdef HAVE_STRUCT_VRT_ENDPOINT_SSLFLAGS
+#ifdef HAVE_STRUCT_VRT_ENDPOINT_SSLFLAGS
 	ep.hosthdr = vrt.hosthdr;
 
 	if (dom->obj->ssl) {
@@ -686,29 +686,24 @@ ref_add(VRT_CTX, struct dynamic_ref *r)
         }
 
 	    ep.sslflags |= BSSL_F_ENABLE;
-	    DBG(ctx, dom, "enabling ssl on endpoint for %s", vcl_name);
 	} else {
 	    ep.sslflags &= ~BSSL_F_ENABLE;
-	    DBG(ctx, dom, "skipping ssl on endpoint for %s", vcl_name);
 	}
 
 	if (dom->obj->ssl_sni) {
         ep.sslflags &= ~BSSL_F_NOSNI;
-	    DBG(ctx, dom, "enabling sni on endpoint for %s", vcl_name);
 	} else {
 	    ep.sslflags |= BSSL_F_NOSNI;
 	}
 
 	if (dom->obj->ssl_nosni) {
         ep.sslflags |= BSSL_F_NOSNI;
-	    DBG(ctx, dom, "skipping sni on endpoint for %s", vcl_name);
 	} else {
 	    ep.sslflags &= ~BSSL_F_NOSNI;
 	}
 
 	if (dom->obj->ssl_noverify) {
         ep.sslflags |= BSSL_F_NOVERIFY;
-	    DBG(ctx, dom, "skipping verification on endpoint for %s", vcl_name);
 	} else {
 	    ep.sslflags &= ~BSSL_F_NOVERIFY;
 	}
@@ -717,22 +712,20 @@ ref_add(VRT_CTX, struct dynamic_ref *r)
         ep.sslflags &= ~BSSL_F_NOVERIFY;
 	} else {
 	    ep.sslflags |= BSSL_F_NOVERIFY;
-	    DBG(ctx, dom, "skipping peer verification on endpoint for %s", vcl_name);
 	}
 
 	if (dom->obj->ssl_verify_host) {
         ep.sslflags |= BSSL_F_VERIFY_HOST;
 	} else {
 	    ep.sslflags &= ~BSSL_F_VERIFY_HOST;
-	    DBG(ctx, dom, "skipping host verification on endpoint for %s", vcl_name);
 	}
-	#else
+#else
 	if (dom->obj->ssl) {
 	    VRT_fail(ctx, "failed to set ssl on director %s. %s was built without SSL support", vcl_name, PACKAGE);
 	    return;
 	}
+#endif
 
-    #endif
 	vrt.endpoint = &ep;
 
 	/* VRT_new_backend comes with a reference */

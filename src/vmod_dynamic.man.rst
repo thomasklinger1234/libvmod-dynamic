@@ -341,29 +341,30 @@ Parameters:
 	  requested for the first time and there is no response from
 	  the name service (defaults to ten seconds)
 
-    - *ssl*
+  - *ssl*
 
-      Enable TLS/SSL transport on this backend , see also `ssl`_.
+    Enable TLS/SSL transport on this backend , see also `ssl`_. Enabling this flag requires `host_header` to be set as well.
+    For builds that do not have a SSL enabled Varnish, setting this flag will cause a failure.
 
-    - *ssl_noverify*
+  - *ssl_noverify*
 
-      Skip TLS/SSL verification.
+    Skip TLS/SSL verification.
 
-    - *ssl_nosni*
+  - *ssl_nosni*
 
-      Suspend Server Name Indication (SNI). This is mutually exclusive with `ssl_sni`.
+    Suspend Server Name Indication (SNI). This is mutually exclusive with `ssl_sni`.
 
-    - *ssl_sni*
+  - *ssl_sni*
 
-      Enable Server Name Indication (SNI).
+    Enable Server Name Indication (SNI).
 
-    - *ssl_verify_peer*
+  - *ssl_verify_peer*
 
-      Enable TLS/SSL peer validation.
+    Enable TLS/SSL peer validation.
 
-    - *ssl_verify_host*
+  - *ssl_verify_host*
 
-      Enable TLS/SSL host validation.
+    Enable TLS/SSL host validation.
 
 	- *resolver*
 
