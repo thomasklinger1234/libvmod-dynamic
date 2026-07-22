@@ -339,22 +339,22 @@ Parameters:
 	  requested for the first time and there is no response from
 	  the name service (defaults to ten seconds)
 
-  - *ssl*
+	- *ssl*
 
-    Enable TLS/SSL transport on this backend , see also `ssl`_. Enabling this flag requires `host_header` to be set as well.
-    For builds that do not have a SSL enabled Varnish, setting this flag will cause a failure.
+	  Enable TLS/SSL transport on this backend , see also `ssl`_. Enabling this flag requires `host_header` to be set as well.
+	  For builds that do not have a SSL enabled Varnish, setting this flag will cause a failure.
 
-  - *ssl_sni*
+	- *ssl_sni*
 
-    Enable Server Name Indication (SNI).
+	  Enable Server Name Indication (SNI).
 
-  - *ssl_verify_peer*
+	- *ssl_verify_peer*
 
-    Enable TLS/SSL peer validation.
+	  Enable TLS/SSL peer validation.
 
-  - *ssl_verify_host*
+	- *ssl_verify_host*
 
-    Enable TLS/SSL host validation.
+	  Enable TLS/SSL host validation.
 
 	- *resolver*
 
@@ -817,7 +817,7 @@ examples are abbreviated.
 
     Backend name                 Admin                     Probe    Health   Last change
     vcl.dyn(www.****.de:(null))  probe                     9/9      healthy  Tue, 04 Jul 2023 15:08:55 GMT
-    
+
                                  Backend                   Health
                                  dyn(88.221.123.106:http)  healthy
                                  dyn(88.221.123.120:http)  healthy
@@ -828,7 +828,7 @@ examples are abbreviated.
                                  dyn(88.221.123.122:http)  healthy
                                  dyn(88.221.123.91:http)   healthy
                                  dyn(88.221.123.88:http)   healthy
-    
+
     vcl.dyn(88.221.123.83:http)  probe                     8/8      healthy  Tue, 04 Jul 2023 15:08:55 GMT
      Current states  good:  8 threshold:  3 window:  8
       Average response time of good probes: 0.114404
