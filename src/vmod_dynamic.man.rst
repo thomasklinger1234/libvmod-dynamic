@@ -23,7 +23,7 @@ SYNOPSIS
 
   import dynamic [as name] [from "path"]
   
-  new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
+  new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, ACL prefer, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
   
       BACKEND xdirector.backend(STRING host, STRING port, STRING authority)
    
@@ -260,8 +260,8 @@ logged with the following event::
 
 .. _dynamic.director():
 
-new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PROBE probe, ACL whitelist, ACL prefer, DURATION ttl, DURATION connect_timeout, DURATION first_byte_timeout, DURATION between_bytes_timeout, DURATION domain_usage_timeout, DURATION first_lookup_timeout, INT max_connections, INT proxy_header, BLOB resolver, ENUM ttl_from, DURATION retry_after, BACKEND via, INT keep, STRING authority, DURATION wait_timeout, INT wait_limit)
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ::
 
@@ -271,6 +271,7 @@ new xdirector = dynamic.director(STRING port, STRING host_header, ENUM share, PR
       ENUM {DEFAULT, DIRECTOR, HOST} share=DEFAULT,
       PROBE probe=0,
       ACL whitelist=0,
+      ACL prefer=0,
       DURATION ttl=3600,
       DURATION connect_timeout=-1,
       DURATION first_byte_timeout=-1,
@@ -316,6 +317,10 @@ Parameters:
 	- *whitelist* - an acl (defaults to none)
 
 	  Only name resolution results matching the acl will be used.
+
+    - *prefer* - an acl (defaults to none)
+
+      Prefer results matching the acl for backend selection.
 
 	- *ttl* - interval between lookups (defaults to one hour)
 
@@ -789,7 +794,7 @@ examples are abbreviated.
 
     Backend name                 Admin                     Probe    Health   Last change
     vcl.dyn(www.****.de:(null))  probe                     9/9      healthy  Tue, 04 Jul 2023 15:08:55 GMT
-    
+
                                  Backend                   Health
                                  dyn(88.221.123.106:http)  healthy
                                  dyn(88.221.123.120:http)  healthy
@@ -800,7 +805,7 @@ examples are abbreviated.
                                  dyn(88.221.123.122:http)  healthy
                                  dyn(88.221.123.91:http)   healthy
                                  dyn(88.221.123.88:http)   healthy
-    
+
     vcl.dyn(88.221.123.83:http)  probe                     8/8      healthy  Tue, 04 Jul 2023 15:08:55 GMT
      Current states  good:  8 threshold:  3 window:  8
       Average response time of good probes: 0.114404
@@ -839,7 +844,7 @@ examples are abbreviated.
   Shows detailed information in JSON format. The dynamic domain object
   contains as ``probe_details`` most properties of the dynamic
   director VCL object. Note that, due to Varnish-Cache API
-  limitations, for ``probe`` and ``whitelist``, only a boolean value
+  limitations, for ``probe``, ``preferred``, and ``whitelist``, only a boolean value
   can be returned. The list of backends represents the active
   backends::
 
@@ -855,6 +860,7 @@ examples are abbreviated.
             "share": "DIRECTOR",
             "probe": true,
             "whitelist": false,
+            "preferred": false,
             "connect_timeout": -1.00,
             "first_byte_timeout": -1.00,
             "between_bytes_timeout": -1.00,

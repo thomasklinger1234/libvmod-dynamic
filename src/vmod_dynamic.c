@@ -1316,6 +1316,7 @@ vmod_director__init(VRT_CTX,
     VCL_ENUM share_arg,
     VCL_PROBE probe,
     VCL_ACL whitelist,
+    VCL_ACL prefer,
     VCL_DURATION ttl,
     VCL_DURATION connect_timeout,
     VCL_DURATION first_byte_timeout,
@@ -1394,6 +1395,7 @@ vmod_director__init(VRT_CTX,
 	obj->share = dynamic_share_parse(share_arg);
 	obj->probe = probe;
 	obj->whitelist = whitelist;
+    obj->prefer = prefer;
 	obj->ttl = ttl;
 	obj->retry_after = retry_after;
 	obj->connect_tmo = connect_timeout;

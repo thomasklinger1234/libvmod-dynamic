@@ -174,6 +174,7 @@ struct vmod_dynamic_director {
 	enum dynamic_share_e			share;
 	VCL_PROBE				probe;
 	VCL_ACL					whitelist;
+    VCL_ACL                 prefer;
 	VCL_DURATION				ttl;
 	VCL_DURATION				retry_after;
 	VCL_DURATION				connect_tmo;
