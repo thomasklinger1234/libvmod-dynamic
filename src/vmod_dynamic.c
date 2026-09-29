@@ -258,7 +258,7 @@ static struct dynamic_ref *
 dom_find(VRT_CTX, struct dynamic_domain *dom, struct dynamic_ref *start,
     VCL_BOOL *healthy, VCL_TIME *changed, unsigned wait)
 {
-	struct dynamic_ref *next, *alt;
+	struct dynamic_ref *next, *healthy_pref, *healthy_alt, *sick_pref, *alt;
 	VCL_TIME c, cc;
 	VCL_BOOL h;
 
@@ -275,6 +275,8 @@ dom_find(VRT_CTX, struct dynamic_domain *dom, struct dynamic_ref *start,
 	h = 0;
 	cc = dom->changed_cached;
 	next = start;
+	healthy_pref = NULL;
+	healthy_alt = NULL;
 	alt = NULL;
 
 	//lint -e{506} Constant value boolean
@@ -286,28 +288,59 @@ dom_find(VRT_CTX, struct dynamic_domain *dom, struct dynamic_ref *start,
 			next = VTAILQ_FIRST(&dom->refs);
 		if (next == NULL)
 			break;
+
 		if (next->dir != creating && next->dir != NULL) {
 			h = VRT_Healthy(ctx, next->dir, &c);
 			if (c > cc)
 				cc = c;
-			if (h)
-				break;
+
+			if (next->preferred) {
+				if (h) {
+					healthy_pref = next;
+					break;
+				} else if (sick_pref == NULL) {
+					sick_pref = next;
+				}
+			} else {
+				if (h && healthy_alt == NULL) {
+					healthy_alt = next;
+				}
+			}
 		}
+
 		/* if we do not find a healthy backend, use one with a director
 		 * or, alternatively, whatever we can get
 		 */
-		if (alt == NULL ||
+		if (alt  == NULL ||
 		    (alt->dir == creating && next->dir != creating))
 			alt = next;
+
 		if (next != start)
 			continue;
 
-		// we have iterated the list once
+		// we have iterated the list once. select final results in priority order:
+        // healthy+preferred > healthy > sick+preferred > whatever-we-can-get.
 
-		if (alt->dir != creating) {
+		if (healthy_pref != NULL) {
+			next = healthy_pref;
+			break;
+		}
+
+		if (healthy_alt != NULL) {
+			next = healthy_alt;
+			break;
+		}
+
+		if (sick_pref != NULL) {
+			next = sick_pref;
+			break;
+		}
+
+		if (alt != NULL && alt->dir != creating) {
 			next = alt;
 			break;
 		}
+
 		if (wait == 0)
 			break;
 
@@ -441,6 +474,8 @@ dom_list(VRT_CTX, VCL_BACKEND dir, struct vsb *vsb, int pflag, int jflag)
 			VSB_indent(vsb, 2);
 			VSB_printf(vsb, "\"health\": \"%s\"\n",
 			    h ? "healthy" : "sick");
+            VSB_printf(vsb, "\"preferred\": %s\n",
+                r->preferred ? "true" : "false");
 			VSB_indent(vsb, -2);
 			VSB_cat(vsb, "}");
 		}
@@ -523,8 +558,10 @@ ref_clone(VRT_CTX, struct dynamic_domain *dom, const struct dynamic_ref *s)
 	r = ref_new(dom);
 	VRT_Assign_Backend(&r->dir, s->dir);
 	r->keep = dom->obj->keep;
+    r->preferred = s->preferred;
 	if (s->sa)
 		r->sa = VSA_Clone(s->sa);
+
 
 	VTAILQ_INSERT_TAIL(&dom->refs, r, list);
 
@@ -723,6 +760,11 @@ dom_update(struct dynamic_domain *dom, const struct res_cb *res,
 		if (! dom_whitelisted(ctx, dom, info->sa))
 			continue;
 
+        int dom_preferred = 0;
+        if (dom->obj->prefer != NULL) {
+            dom_preferred = VRT_acl_match(ctx, dom->obj->prefer, info->sa);
+        }
+
 		if (info->ttl != 0 && (isnan(ttl) || info->ttl < ttl))
 			ttl = info->ttl;
 
@@ -733,6 +775,7 @@ dom_update(struct dynamic_domain *dom, const struct res_cb *res,
 		}
 		if (r != NULL) {
 			assert(r->dir != creating);
+            r->preferred = dom_preferred;
 			VTAILQ_REMOVE(&dom->oldrefs, r, list);
 			VTAILQ_INSERT_TAIL(&dom->refs, r, list);
 			r->keep = dom->obj->keep;
@@ -764,13 +807,16 @@ dom_update(struct dynamic_domain *dom, const struct res_cb *res,
 			if (r != NULL)
 				break;
 		}
-		if (r != NULL)
+		if (r != NULL) {
+            r->preferred = dom_preferred;
 			continue;
+        }
 
 	  ref_add:
 		added++;
 		r = ref_new(dom);
 		r->sa = VSA_Clone(info->sa);
+        r->preferred = dom_preferred;
 		AZ(r->dir);
 		r->dir = creating;
 		VTAILQ_INSERT_TAIL(&dom->refs, r, list);

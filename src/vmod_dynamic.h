@@ -52,6 +52,7 @@ struct dynamic_ref {
 	VCL_BACKEND			dir;
 	// if via is used
 	const struct suckaddr		*sa;
+    VCL_BOOL preferred;
 };
 
 enum dynamic_status_e {
