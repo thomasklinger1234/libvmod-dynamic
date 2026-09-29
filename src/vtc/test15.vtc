@@ -1,0 +1,70 @@
+varnishtest "prefer ACL-matching backends"
+
+#feature cmd "getent hosts localhost"
+
+server s4 -listen 127.0.0.1 {
+	rxreq
+	expect req.http.host == localhost
+	txresp -hdr "x-backend: ipv4"
+} -start
+
+server s6 -listen ::1 {
+	rxreq
+	expect req.http.host == localhost
+	txresp -hdr "x-backend: ipv6"
+} -start
+
+varnish v1 -vcl {
+	import dynamic;
+
+	backend proforma none;
+
+	acl ipv4 {
+		"0.0.0.0"/0;
+	}
+
+	acl ipv6 {
+		"::0"/0;
+	}
+
+	sub vcl_init {
+		new dv4 = dynamic.director(
+			port = "${s4_port}",
+			prefer = ipv4,
+		);
+		new dv6 = dynamic.director(
+			port = "${s6_port}",
+			prefer = ipv6,
+		);
+	}
+
+	sub vcl_recv {
+		if (req.http.host-acl == "v4") {
+			set req.backend_hint = dv4.backend("localhost");
+		}
+		if (req.http.host-acl == "v6") {
+			set req.backend_hint = dv6.backend("localhost");
+		}
+	}
+
+	sub vcl_backend_error {
+		# localhost may resolve ::1 before 127.0.0.1.
+		return (retry);
+	}
+} -start
+
+client c4 -repeat 10 {
+	txreq -hdr "Host: localhost" -hdr "host-acl: v4"
+	rxresp
+
+	expect resp.status == 200
+	expect resp.http.x-backend == ipv4
+}
+
+client c6 -repeat 10 {
+	txreq -hdr "Host: localhost" -hdr "host-acl: v6"
+	rxresp
+
+	expect resp.status == 200
+	expect resp.http.x-backend == ipv6
+} -run
