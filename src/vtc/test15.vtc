@@ -1,6 +1,6 @@
 varnishtest "prefer ACL-matching backends"
 
-#feature cmd "getent hosts localhost"
+feature cmd "getent hosts localhost"
 
 server s4 -listen 127.0.0.1 {
 	rxreq
