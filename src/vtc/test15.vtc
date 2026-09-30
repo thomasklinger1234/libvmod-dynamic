@@ -2,13 +2,13 @@ varnishtest "prefer ACL-matching backends"
 
 feature cmd "getent hosts localhost"
 
-server s4 -listen 127.0.0.1 {
+server s4 -listen 127.0.0.1 -repeat 10 {
 	rxreq
 	expect req.http.host == localhost
 	txresp -hdr "x-backend: ipv4"
 } -start
 
-server s6 -listen ::1 {
+server s6 -listen ::1 -repeat 10 {
 	rxreq
 	expect req.http.host == localhost
 	txresp -hdr "x-backend: ipv6"
@@ -47,9 +47,11 @@ varnish v1 -vcl {
 		}
 	}
 
-	sub vcl_backend_error {
-		# localhost may resolve ::1 before 127.0.0.1.
-		return (retry);
+	# Keep every request going to a backend, so that selecting the wrong
+	# address family surfaces as a connection failure rather than being
+	# hidden by a cache hit or a retry.
+	sub vcl_backend_response {
+		set beresp.uncacheable = true;
 	}
 } -start
 
@@ -59,7 +61,7 @@ client c4 -repeat 10 {
 
 	expect resp.status == 200
 	expect resp.http.x-backend == ipv4
-}
+} -run
 
 client c6 -repeat 10 {
 	txreq -hdr "Host: localhost" -hdr "host-acl: v6"
