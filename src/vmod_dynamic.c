@@ -277,6 +277,7 @@ dom_find(VRT_CTX, struct dynamic_domain *dom, struct dynamic_ref *start,
 	next = start;
 	healthy_pref = NULL;
 	healthy_alt = NULL;
+	sick_pref = NULL;
 	alt = NULL;
 
 	//lint -e{506} Constant value boolean
@@ -321,25 +322,33 @@ dom_find(VRT_CTX, struct dynamic_domain *dom, struct dynamic_ref *start,
 		// we have iterated the list once. select final results in priority order:
         // healthy+preferred > healthy > sick+preferred > whatever-we-can-get.
 
+#define VDIR_HEALTHY 1
+#define VDIR_SICK 0
 		if (healthy_pref != NULL) {
 			next = healthy_pref;
+			h = VDIR_HEALTHY;
 			break;
 		}
 
 		if (healthy_alt != NULL) {
 			next = healthy_alt;
+			h = VDIR_HEALTHY;
 			break;
 		}
 
 		if (sick_pref != NULL) {
 			next = sick_pref;
+			h = VDIR_SICK;
 			break;
 		}
 
 		if (alt != NULL && alt->dir != creating) {
 			next = alt;
+			h = VDIR_SICK;
 			break;
 		}
+#undef VDIR_HEALTHY
+#undef VDIR_SICK
 
 		if (wait == 0)
 			break;
