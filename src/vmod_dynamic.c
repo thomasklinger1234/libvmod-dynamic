@@ -320,25 +320,29 @@ dom_find(VRT_CTX, struct dynamic_domain *dom, struct dynamic_ref *start,
 			continue;
 
 		// we have iterated the list once. select final results in priority order:
-        // healthy+preferred > healthy > sick+preferred > whatever-we-can-get.
+		// healthy+preferred > healthy > sick+preferred > whatever-we-can-get.
 
 		if (healthy_pref != NULL) {
 			next = healthy_pref;
+			h = 1;
 			break;
 		}
 
 		if (healthy_alt != NULL) {
 			next = healthy_alt;
+			h = 1;
 			break;
 		}
 
 		if (sick_pref != NULL) {
 			next = sick_pref;
+			h = 0;
 			break;
 		}
 
 		if (alt != NULL && alt->dir != creating) {
 			next = alt;
+			h = 0;
 			break;
 		}
 
