@@ -477,10 +477,10 @@ dom_list(VRT_CTX, VCL_BACKEND dir, struct vsb *vsb, int pflag, int jflag)
 			VSB_printf(vsb, "\"%s\": {\n",
 			    be->vcl_name);
 			VSB_indent(vsb, 2);
-			VSB_printf(vsb, "\"health\": \"%s\"\n",
+			VSB_printf(vsb, "\"health\": \"%s\",\n",
 			    h ? "healthy" : "sick");
-            VSB_printf(vsb, "\"preferred\": %s\n",
-                r->preferred ? "true" : "false");
+			VSB_printf(vsb, "\"preferred\": %s\n",
+			    r->preferred ? "true" : "false");
 			VSB_indent(vsb, -2);
 			VSB_cat(vsb, "}");
 		}
