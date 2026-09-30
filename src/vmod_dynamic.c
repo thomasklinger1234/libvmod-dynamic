@@ -277,6 +277,7 @@ dom_find(VRT_CTX, struct dynamic_domain *dom, struct dynamic_ref *start,
 	next = start;
 	healthy_pref = NULL;
 	healthy_alt = NULL;
+	sick_pref = NULL;
 	alt = NULL;
 
 	//lint -e{506} Constant value boolean
